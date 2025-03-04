@@ -46,7 +46,7 @@ class Cursor {
             }
         }.bind(this));
     }
-    
+
     $stopCssAnimation() {
         this.$isAnimating = false;
         dom.removeCssClass(this.element, "ace_animate-blinking");
@@ -136,7 +136,7 @@ class Cursor {
             this.$isSmoothBlinking = false;
             dom.removeCssClass(this.element, "ace_smooth-blinking");
         }
-        
+
         update(true);
 
         if (!this.isBlinking || !this.blinkInterval || !this.isVisible) {
@@ -152,7 +152,7 @@ class Cursor {
                 }
             }.bind(this));
         }
-        
+
         if (dom.HAS_CSS_ANIMATION) {
             this.$startCssAnimation();
         } else {
@@ -183,12 +183,15 @@ class Cursor {
         if (!position)
             position = this.session.selection.getCursor();
         var pos = this.session.documentToScreenPosition(position);
+
         var cursorLeft = this.$padding + (this.session.$bidiHandler.isBidiRow(pos.row, position.row)
             ? this.session.$bidiHandler.getPosLeft(pos.column)
             : pos.column * this.config.characterWidth);
 
         var cursorTop = (pos.row - (onScreen ? this.config.firstRowScreen : 0)) *
             this.config.lineHeight;
+
+		cursorLeft = dom.unicodeAdjustPosition(this, pos.row, cursorLeft);
 
         return {left : cursorLeft, top : cursorTop};
     }
@@ -216,7 +219,7 @@ class Cursor {
 
             var element = this.cursors[cursorIndex++] || this.addCursor();
             var style = element.style;
-            
+
             if (!this.drawCursor) {
                 if (!this.isCursorInView(pixelPos, config)) {
                     dom.setStyle(style, "display", "none");

@@ -1,14 +1,14 @@
 "use strict";
 
-var useragent = require("./useragent"); 
+var useragent = require("./useragent");
 var XHTML_NS = "http://www.w3.org/1999/xhtml";
 
 /**
- * 
+ *
  * @param {any} arr
  * @param {HTMLElement} [parent]
  * @param [refs]
- * @returns {HTMLElement | Text | any[]} 
+ * @returns {HTMLElement | Text | any[]}
  */
 exports.buildDom = function buildDom(arr, parent, refs) {
     if (typeof arr == "string" && arr) {
@@ -17,7 +17,7 @@ exports.buildDom = function buildDom(arr, parent, refs) {
             parent.appendChild(txt);
         return txt;
     }
-    
+
     if (!Array.isArray(arr)) {
         if (arr && arr.appendChild && parent)
             parent.appendChild(arr);
@@ -31,7 +31,7 @@ exports.buildDom = function buildDom(arr, parent, refs) {
         }
         return els;
     }
-    
+
     var el = document.createElement(arr[0]);
     var options = arr[1];
     var childIndex = 1;
@@ -61,7 +61,7 @@ exports.buildDom = function buildDom(arr, parent, refs) {
 };
 
 /**
- * 
+ *
  * @param {Document} [doc]
  * @returns {HTMLHeadElement|HTMLElement}
  */
@@ -255,16 +255,16 @@ function importCssString(cssText, id, target) {
         if (!container || container == target)
             container = document;
     }
-    
+
     var doc = container.ownerDocument || container;
-    
+
     // If style is already imported return immediately.
     if (id && exports.hasCssString(id, container))
         return null;
-    
+
     if (id)
         cssText += "\n/*# sourceURL=ace/css/" + id + " */";
-    
+
     var style = exports.createElement("style");
     style.appendChild(doc.createTextNode(cssText));
     if (id)
@@ -337,7 +337,7 @@ exports.computedStyle = function(element, style) {
 };
 
 /**
- * 
+ *
  * @param {CSSStyleDeclaration} styles
  * @param {string} property
  * @param {string} value
@@ -377,3 +377,85 @@ if (exports.HAS_CSS_TRANSFORMS) {
         element.style.left = Math.round(tx) + "px";
     };
 }
+
+exports.unicodeAdjustPosition = function(layer, row, left)
+	{
+		do
+
+        	{
+
+				var editor = layer.session.$editor;
+
+				var column = editor.getCursorPosition().column;
+
+				var textElement = editor.renderer.$textLayer.element;
+				var lineElement = textElement.childNodes[row - editor.renderer.layerConfig.firstRow];
+				if (!lineElement)
+					{
+						break;
+					}
+				if (lineElement.getAttribute('class').indexOf('ace_line_group') >= 0)
+					lineElement = lineElement.firstChild;
+
+				var eol = true,
+					nextCharNum = 0,
+					tab;
+
+				var lineSource = layer.session.getLine(row);
+				var m = lineSource.match(/^(\t+)/);
+				var tabsCount = m ? m[1].length : 0;
+
+console.log('----------------------');
+console.log('column: ' + column);
+console.log('tabsCount: '+tabsCount);
+
+var i = 0;
+				var parse = function(node)
+					{
+						if (node.nodeType == node.ELEMENT_NODE)
+							{
+								for (var childNode of node.childNodes)
+									if (parse(childNode)) return true;
+							}
+						else
+							{
+								tab = tabsCount-- > 0;
+								nextCharNum += tab ? 1 : node.nodeValue.length;
+console.log('node number ' + (i++));
+console.log(node);
+console.log(nextCharNum);
+								targetNode = node;
+
+								if (nextCharNum > column)
+									{
+console.log('done');
+										eol = false;
+										return true;
+									}
+							}
+					};
+
+				var targetNode;
+				parse(lineElement);
+
+
+				if (!targetNode) break;
+console.log('tab: '+tab);
+console.log('eol: '+eol);
+				var range = document.createRange();
+				var offset = (tab && !eol) ? 0 : (targetNode.nodeValue.length - (nextCharNum - column));
+console.log('targetNode:');
+console.log(targetNode);
+console.log('offset: '+offset);
+
+				range.setStart(targetNode, offset);
+				range.setEnd(targetNode, offset);
+
+				left = range.getBoundingClientRect().left
+							- layer.element.getBoundingClientRect().left;
+
+        	}
+        while (false);
+
+		return left;
+	};
