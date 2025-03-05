@@ -448,6 +448,8 @@ console.log('targetNode:');
 console.log(targetNode);
 console.log('offset: '+offset);
 
+				if (offset > targetNode.nodeValue.length) break;
+
 				range.setStart(targetNode, offset);
 				range.setEnd(targetNode, offset);
 
