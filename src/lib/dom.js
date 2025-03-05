@@ -420,7 +420,9 @@ var i = 0;
 						else
 							{
 								tab = tabsCount-- > 0;
-								nextCharNum += tab ? 1 : node.nodeValue.length;
+								nextCharNum += tab ? 1 :
+									node.nodeValue.replace(/[\u0300-\u036F]/g, '').length;
+
 console.log('node number ' + (i++));
 console.log(node);
 console.log(nextCharNum);
@@ -443,7 +445,17 @@ console.log('done');
 console.log('tab: '+tab);
 console.log('eol: '+eol);
 				var range = document.createRange();
-				var offset = (tab && !eol) ? 0 : (targetNode.nodeValue.length - (nextCharNum - column));
+				var offset = (tab && !eol) ? 0 : (targetNode.nodeValue.replace(/[\u0300-\u036F]/g, '').length - (nextCharNum - column));
+				if (offset && targetNode.nodeValue.match(/[\u0300-\u036F]/))
+					{
+						for (var i=0; i<targetNode.nodeValue.length; i++)
+							{
+								var ch = targetNode.nodeValue.substr(i, 1);
+								if (!ch.match(/[\u0300-\u036F]/))
+									if (!(offset--)) break;
+							}
+						offset = i;
+					}
 console.log('targetNode:');
 console.log(targetNode);
 console.log('offset: '+offset);
