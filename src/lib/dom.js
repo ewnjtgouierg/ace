@@ -405,9 +405,9 @@ exports.unicodeAdjustPosition = function(layer, row, left)
 				var m = lineSource.match(/^(\t+)/);
 				var tabsCount = m ? m[1].length : 0;
 
-console.log('----------------------');
-console.log('column: ' + column);
-console.log('tabsCount: '+tabsCount);
+// console.log('----------------------');
+// console.log('column: ' + column);
+// console.log('tabsCount: '+tabsCount);
 
 var i = 0;
 				var parse = function(node)
@@ -423,14 +423,14 @@ var i = 0;
 								nextCharNum += tab ? 1 :
 									node.nodeValue.replace(/[\u0300-\u036F]/g, '').length;
 
-console.log('node number ' + (i++));
-console.log(node);
-console.log(nextCharNum);
+// console.log('node number ' + (i++));
+// console.log(node);
+// console.log(nextCharNum);
 								targetNode = node;
 
 								if (nextCharNum > column)
 									{
-console.log('done');
+// console.log('done');
 										eol = false;
 										return true;
 									}
@@ -442,8 +442,8 @@ console.log('done');
 
 
 				if (!targetNode) break;
-console.log('tab: '+tab);
-console.log('eol: '+eol);
+// console.log('tab: '+tab);
+// console.log('eol: '+eol);
 				var range = document.createRange();
 				var offset = (tab && !eol) ? 0 : (targetNode.nodeValue.replace(/[\u0300-\u036F]/g, '').length - (nextCharNum - column));
 				if (offset && targetNode.nodeValue.match(/[\u0300-\u036F]/))
@@ -456,9 +456,9 @@ console.log('eol: '+eol);
 							}
 						offset = i;
 					}
-console.log('targetNode:');
-console.log(targetNode);
-console.log('offset: '+offset);
+// console.log('targetNode:');
+// console.log(targetNode);
+// console.log('offset: '+offset);
 
 				if (offset > targetNode.nodeValue.length) break;
 
@@ -473,3 +473,9 @@ console.log('offset: '+offset);
 
 		return left;
 	};
+
+Object.defineProperty(String.prototype, "lengthAce", {
+    get: function lengthSemiTrue() {
+		return this.replace(/[\u0300-\u036F]/g, '').length;
+    }
+});

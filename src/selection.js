@@ -424,7 +424,7 @@ class Selection {
         if (fold = this.session.getFoldAt(cursor.row, cursor.column, 1)) {
             this.moveCursorTo(fold.end.row, fold.end.column);
         }
-        else if (this.lead.column == this.doc.getLine(this.lead.row).length) {
+        else if (this.lead.column == this.doc.getLine(this.lead.row).lengthAce) {
             if (this.lead.row < this.doc.getLength() - 1) {
                 this.moveCursorTo(this.lead.row + 1, 0);
             }
@@ -475,7 +475,7 @@ class Selection {
         var lineEnd = this.session.getDocumentLastRowColumnPosition(lead.row, lead.column);
         if (this.lead.column == lineEnd.column) {
             var line = this.session.getLine(lineEnd.row);
-            if (lineEnd.column == line.length) {
+            if (lineEnd.column == line.lengthAce) {
                 var textEnd = line.search(/\s+$/);
                 if (textEnd > 0)
                     lineEnd.column = textEnd;
