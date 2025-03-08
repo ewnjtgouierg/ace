@@ -2039,10 +2039,7 @@ class EditSession {
             } else if((c > 39 && c < 48) || (c > 57 && c < 64)) {
                 arr.push(PUNCTUATION);
             }
-            // full width characters
-            else if (c >= 0x1100 && isFullWidth(c)) {
-                arr.push(CHAR, CHAR_EXT);
-            } else {
+            else {
                 arr.push(CHAR);
             }
         }
@@ -2067,6 +2064,7 @@ class EditSession {
         screenColumn = screenColumn || 0;
 
         var c, column, diacritics = 0;
+
         for (column = 0; column < str.length; column++) {
             c = str.charCodeAt(column);
 
@@ -2076,16 +2074,7 @@ class EditSession {
         			continue;
         		}
 
-            // tab
-            if (c == 9) {
-                screenColumn += this.getScreenTabSize(screenColumn);
-            }
-            // full width characters
-            else if (c >= 0x1100 && isFullWidth(c)) {
-                screenColumn += 2;
-            } else {
-                screenColumn += 1;
-            }
+			screenColumn += 1;
             if (screenColumn > maxScreenColumn) {
                 break;
             }

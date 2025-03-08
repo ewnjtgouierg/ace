@@ -1,4 +1,4 @@
-"use strict";
+// "use strict";
 
 var useragent = require("./useragent");
 var XHTML_NS = "http://www.w3.org/1999/xhtml";
@@ -378,104 +378,120 @@ if (exports.HAS_CSS_TRANSFORMS) {
     };
 }
 
-exports.unicodeAdjustPosition = function(layer, row, left)
+exports.unicodeAdjustPosition = function({layer, row, left, column} = {})
 	{
-		do
 
-        	{
+		var editor = layer.session.$editor;
 
-				var editor = layer.session.$editor;
+		if (typeof column == 'undefined')
+			column = editor.getCursorPosition().column;
+console.log('column: ' + column);
+		var textElement = editor.renderer.$textLayer.element;
+		var lineElement = textElement.childNodes[row - editor.renderer.layerConfig.firstRow];
+		if (!lineElement)
+			{
+				return;
+			}
+		if (lineElement.getAttribute('class').indexOf('ace_line_group') >= 0)
+			lineElement = lineElement.firstChild;
 
-				var column = editor.getCursorPosition().column;
+		var eol = true,
+			nextCharNum = 0,
+			tab;
 
-				var textElement = editor.renderer.$textLayer.element;
-				var lineElement = textElement.childNodes[row - editor.renderer.layerConfig.firstRow];
-				if (!lineElement)
-					{
-						break;
-					}
-				if (lineElement.getAttribute('class').indexOf('ace_line_group') >= 0)
-					lineElement = lineElement.firstChild;
-
-				var eol = true,
-					nextCharNum = 0,
-					tab;
-
-				var lineSource = layer.session.getLine(row);
-				var m = lineSource.match(/^(\t+)/);
-				var tabsCount = m ? m[1].length : 0;
+		var lineSource = layer.session.getLine(row);
+		var m = lineSource.match(/^(\t+)/);
+		var tabsCount = m ? m[1].length : 0;
 
 // console.log('----------------------');
 // console.log('column: ' + column);
 // console.log('tabsCount: '+tabsCount);
 
 var i = 0;
-				var parse = function(node)
+		var parse = function(node)
+			{
+				if (node.nodeType == node.ELEMENT_NODE)
 					{
-						if (node.nodeType == node.ELEMENT_NODE)
-							{
-								for (var childNode of node.childNodes)
-									if (parse(childNode)) return true;
-							}
-						else
-							{
-								tab = tabsCount-- > 0;
-								nextCharNum += tab ? 1 :
-									node.nodeValue.replace(/[\u0300-\u036F]/g, '').length;
+						for (var childNode of node.childNodes)
+							if (parse(childNode)) return true;
+					}
+				else
+					{
+						tab = tabsCount-- > 0;
+						nextCharNum += tab ? 1 : node.nodeValue.trueLength;
 
 // console.log('node number ' + (i++));
 // console.log(node);
 // console.log(nextCharNum);
-								targetNode = node;
+						targetNode = node;
 
-								if (nextCharNum > column)
-									{
+						if (nextCharNum > column)
+							{
 // console.log('done');
-										eol = false;
-										return true;
-									}
+								eol = false;
+								return true;
 							}
-					};
+					}
+			};
 
-				var targetNode;
-				parse(lineElement);
+		var targetNode;
+		parse(lineElement);
 
 
-				if (!targetNode) break;
+		if (!targetNode) return;
 // console.log('tab: '+tab);
 // console.log('eol: '+eol);
-				var range = document.createRange();
-				var offset = (tab && !eol) ? 0 : (targetNode.nodeValue.replace(/[\u0300-\u036F]/g, '').length - (nextCharNum - column));
-				if (offset && targetNode.nodeValue.match(/[\u0300-\u036F]/))
-					{
-						for (var i=0; i<targetNode.nodeValue.length; i++)
-							{
-								var ch = targetNode.nodeValue.substr(i, 1);
-								if (!ch.match(/[\u0300-\u036F]/))
-									if (!(offset--)) break;
-							}
-						offset = i;
-					}
+		var range = document.createRange();
+		var offset = (tab && !eol) ? 0 : (targetNode.nodeValue.trueLength - (nextCharNum - column));
+
+		if (offset > targetNode.nodeValue.trueLength) return;
+console.log('offset='+offset);
+		offset = targetNode.nodeValue.charRealPos[offset];
+console.log('real offset='+offset);
+		if (offset > targetNode.nodeValue.length) return;
+
 // console.log('targetNode:');
 // console.log(targetNode);
 // console.log('offset: '+offset);
 
-				if (offset > targetNode.nodeValue.length) break;
+		range.setStart(targetNode, offset);
+		range.setEnd(targetNode, offset);
 
-				range.setStart(targetNode, offset);
-				range.setEnd(targetNode, offset);
-
-				left = range.getBoundingClientRect().left
-							- layer.element.getBoundingClientRect().left;
-
-        	}
-        while (false);
+		left = range.getBoundingClientRect().left
+					- layer.element.getBoundingClientRect().left;
 
 		return left;
+
 	};
 
-Object.defineProperty(String.prototype, "lengthAce", {
-    get: function lengthSemiTrue() {
-		return this.replace(/[\u0300-\u036F]/g, '').length;
+Object.defineProperty(String.prototype, "charRealPos", {
+  value: [],
+  writable: true,
+});
+Object.defineProperty(String.prototype, "trueLength", {
+    get: function () {
+
+		var diacriticsExtra = [];
+    	var withoutCDM = this.replace(/[^\u0300-\u036F][\u0300-\u036F]+/g, function(match, offset)
+		    {
+				diacriticsExtra[offset] = match.length;
+				return ' ';
+		    });
+
+		this.charRealPos.length = 0;
+
+		var chars = Array.from(withoutCDM);
+		var pos = 0;
+		for (var i=0; i<chars.length; i++)
+			{
+				this.charRealPos[i] = pos;
+				pos += diacriticsExtra[pos] || 0;
+				pos += chars[i].length;
+			}
+
+		return chars.length;
     }
 });
+var str = "nice let's go";
+console.log(str.trueLength);
+console.log(str.charRealPos);

@@ -217,6 +217,23 @@ class Marker {
             return this.drawBidiSingleLineMarker(stringBuilder, range, clazz, config, extraLength, extraStyle);
         var height = config.lineHeight;
         var width = (range.end.column + (extraLength || 0) - range.start.column) * config.characterWidth;
+console.log([range.start.column, range.end.column]);
+		real:
+			{
+				var x = {};
+				for (var side of ['start', 'end'])
+					{
+						x[side] = dom.unicodeAdjustPosition({
+							layer: this,
+							row: range[side].row,
+							column: range[side].column
+								});
+						if (x[side] === false)
+							break real;
+					}
+				
+				width = x.end - x.start;
+			}
 
         var top = this.$getTop(range.start.row, config);
         var left = this.$padding + range.start.column * config.characterWidth;

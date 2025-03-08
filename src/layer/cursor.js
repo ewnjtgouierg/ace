@@ -184,14 +184,18 @@ class Cursor {
             position = this.session.selection.getCursor();
         var pos = this.session.documentToScreenPosition(position);
 
-        var cursorLeft = this.$padding + (this.session.$bidiHandler.isBidiRow(pos.row, position.row)
-            ? this.session.$bidiHandler.getPosLeft(pos.column)
-            : pos.column * this.config.characterWidth);
+		var cursorLeft = dom.unicodeAdjustPosition({
+			layer: this,
+			row: pos.row,
+				});
+
+		if (typeof cursorLeft == typeof undefined)
+	        cursorLeft = this.$padding + (this.session.$bidiHandler.isBidiRow(pos.row, position.row)
+	            ? this.session.$bidiHandler.getPosLeft(pos.column)
+	            : pos.column * this.config.characterWidth);
 
         var cursorTop = (pos.row - (onScreen ? this.config.firstRowScreen : 0)) *
             this.config.lineHeight;
-
-		cursorLeft = dom.unicodeAdjustPosition(this, pos.row, cursorLeft);
 
         return {left : cursorLeft, top : cursorTop};
     }
