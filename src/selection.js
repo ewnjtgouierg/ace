@@ -709,7 +709,6 @@ class Selection {
             this.lead.row,
             this.lead.column
         );
-
         var offsetX;
 
         if (chars === 0) {
@@ -769,14 +768,7 @@ class Selection {
         }
 
         this.$keepDesiredColumnOnChange = true;
-        var line = this.session.getLine(row);
-        // do not allow putting cursor in the middle of surrogate pairs
-        if (/[\uDC00-\uDFFF]/.test(line.charAt(column)) && line.charAt(column - 1)) {
-            if (this.lead.row == row && this.lead.column == column + 1)
-                column = column - 1;
-            else
-                column = column + 1;
-        }
+
         this.lead.setPosition(row, column);
         this.$keepDesiredColumnOnChange = false;
 

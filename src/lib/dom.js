@@ -1,4 +1,4 @@
-// "use strict";
+"use strict";
 
 var useragent = require("./useragent");
 var XHTML_NS = "http://www.w3.org/1999/xhtml";
@@ -381,11 +381,15 @@ if (exports.HAS_CSS_TRANSFORMS) {
 exports.unicodeAdjustPosition = function({layer, row, left, column} = {})
 	{
 
+// console.log('----------------------');
+
 		var editor = layer.session.$editor;
 
+// console.log('column', column);
 		if (typeof column == 'undefined')
 			column = editor.getCursorPosition().column;
-console.log('column: ' + column);
+// console.log('column', column);
+
 		var textElement = editor.renderer.$textLayer.element;
 		var lineElement = textElement.childNodes[row - editor.renderer.layerConfig.firstRow];
 		if (!lineElement)
@@ -403,7 +407,6 @@ console.log('column: ' + column);
 		var m = lineSource.match(/^(\t+)/);
 		var tabsCount = m ? m[1].length : 0;
 
-// console.log('----------------------');
 // console.log('column: ' + column);
 // console.log('tabsCount: '+tabsCount);
 
@@ -445,14 +448,13 @@ var i = 0;
 		var offset = (tab && !eol) ? 0 : (targetNode.nodeValue.trueLength - (nextCharNum - column));
 
 		if (offset > targetNode.nodeValue.trueLength) return;
-console.log('offset='+offset);
+// console.log('offset', offset);
 		offset = targetNode.nodeValue.charRealPos[offset];
-console.log('real offset='+offset);
+// console.log('real offset', offset);
 		if (offset > targetNode.nodeValue.length) return;
 
-// console.log('targetNode:');
-// console.log(targetNode);
-// console.log('offset: '+offset);
+// console.log('targetNode', targetNode);
+// console.log('offset', offset);
 
 		range.setStart(targetNode, offset);
 		range.setEnd(targetNode, offset);
@@ -468,30 +470,54 @@ Object.defineProperty(String.prototype, "charRealPos", {
   value: [],
   writable: true,
 });
+Object.defineProperty(String.prototype, "chars", {
+  value: [],
+  writable: true,
+});
+String.prototype.trueCharAt = function (i) {
+		if (this.length == this.trueLength)
+    		return this.charAt(i);
+    	return this.chars[i];
+    };
 Object.defineProperty(String.prototype, "trueLength", {
     get: function () {
 
-		var diacriticsExtra = [];
+		var diacritics = [];
+
     	var withoutCDM = this.replace(/[^\u0300-\u036F][\u0300-\u036F]+/g, function(match, offset)
-		    {
-				diacriticsExtra[offset] = match.length;
-				return ' ';
-		    });
+			{
+				diacritics.push({
+					length: match.length,
+					content: match,
+						});
+				return "\u0300";
+			});
 
 		this.charRealPos.length = 0;
 
 		var chars = Array.from(withoutCDM);
+
 		var pos = 0;
-		for (var i=0; i<chars.length; i++)
+
+		this.chars.length = 0;
+
+		for (var v of chars)
 			{
-				this.charRealPos[i] = pos;
-				pos += diacriticsExtra[pos] || 0;
-				pos += chars[i].length;
-			}
+				if (v == "\u0300")
+					v = diacritics.shift().content;
+				this.charRealPos.push(pos);
+				pos += v.length;
+				this.chars.push(v);
+			};
+
+		this.charRealPos.push(pos);
 
 		return chars.length;
     }
 });
-var str = "nice let's go";
-console.log(str.trueLength);
-console.log(str.charRealPos);
+String.prototype.trueSubstring = function(start, end)
+	{
+		this.trueLength;
+		var chars = this.chars.slice(start, end);
+		return chars.join('');
+	};

@@ -217,7 +217,7 @@ class Marker {
             return this.drawBidiSingleLineMarker(stringBuilder, range, clazz, config, extraLength, extraStyle);
         var height = config.lineHeight;
         var width = (range.end.column + (extraLength || 0) - range.start.column) * config.characterWidth;
-console.log([range.start.column, range.end.column]);
+
 		real:
 			{
 				var x = {};
@@ -236,7 +236,7 @@ console.log([range.start.column, range.end.column]);
 			}
 
         var top = this.$getTop(range.start.row, config);
-        var left = this.$padding + range.start.column * config.characterWidth;
+        var left = x.start;
 
         this.elt(
             clazz,

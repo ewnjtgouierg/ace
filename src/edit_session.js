@@ -2055,7 +2055,7 @@ class EditSession {
      * The first position indicates the number of columns for `str` on screen.<br/>
      * The second value contains the position of the document column that this function read until.
      **/
-    $getStringScreenWidth(str, maxScreenColumn, screenColumn, screenToDocumentPosition = false) {
+    $getStringScreenWidth(str, maxScreenColumn, screenColumn) {
 
         if (maxScreenColumn == 0)
             return [0, 0];
@@ -2063,24 +2063,11 @@ class EditSession {
             maxScreenColumn = Infinity;
         screenColumn = screenColumn || 0;
 
-        var c, column, diacritics = 0;
+        var column = str.trueLength;
 
-        for (column = 0; column < str.length; column++) {
-            c = str.charCodeAt(column);
+        column = Math.min(column, maxScreenColumn);
 
-        	if (screenToDocumentPosition && c >= 0x0300 && c <= 0x036F)
-        		{
-        			diacritics++;
-        			continue;
-        		}
-
-			screenColumn += 1;
-            if (screenColumn > maxScreenColumn) {
-                break;
-            }
-        }
-
-		column -= diacritics;
+        screenColumn += column;
 
         return [screenColumn, column];
     }
@@ -2287,7 +2274,7 @@ class EditSession {
         if (offsetX !== undefined && this.$bidiHandler.isBidiRow(row + splitIndex, docRow, splitIndex))
             screenColumn = this.$bidiHandler.offsetToCol(offsetX);
 
-        docColumn += this.$getStringScreenWidth(line, screenColumn - wrapIndent, null, true)[1];
+        docColumn += this.$getStringScreenWidth(line, screenColumn - wrapIndent)[1];
 
         // We remove one character at the end so that the docColumn
         // position returned is not associated to the next row on the screen.
@@ -2373,7 +2360,7 @@ class EditSession {
             textLine = this.getFoldDisplayLine(foldLine, docRow, docColumn);
             foldStartRow = foldLine.start.row;
         } else {
-            textLine = this.getLine(docRow).substring(0, docColumn);
+            textLine = this.getLine(docRow).trueSubstring(0, docColumn);
             foldStartRow = docRow;
         }
         var wrapIndent = 0;
