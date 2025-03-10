@@ -178,14 +178,14 @@ class Document {
         var lines;
         if (range.start.row === range.end.row) {
             // Handle a single-line range.
-            lines = [this.getLine(range.start.row).substring(range.start.column, range.end.column)];
+            lines = [this.getLine(range.start.row).trueSubstring(range.start.column, range.end.column)];
         } else {
             // Handle a multi-line range.
             lines = this.getLines(range.start.row, range.end.row);
-            lines[0] = (lines[0] || "").substring(range.start.column);
+            lines[0] = (lines[0] || "").trueSubstring(range.start.column);
             var l = lines.length - 1;
             if (range.end.row - range.start.row == l)
-                lines[l] = lines[l].substring(0, range.end.column);
+                lines[l] = lines[l].trueSubstring(0, range.end.column);
         }
         return lines;
     }
