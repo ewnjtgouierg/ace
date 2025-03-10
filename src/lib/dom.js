@@ -378,7 +378,7 @@ if (exports.HAS_CSS_TRANSFORMS) {
     };
 }
 
-exports.unicodeAdjustPosition = function({layer, row, left, column} = {})
+exports.columnToCoordinate = function({layer, row, left, column} = {})
 	{
 
 // console.log('----------------------');

@@ -154,7 +154,13 @@ class Marker {
         var padding = this.$padding;
         var height = config.lineHeight;
         var top = this.$getTop(range.start.row, config);
-        var left = padding + range.start.column * config.characterWidth;
+
+        var left = dom.columnToCoordinate({
+            	layer: this,
+            	row: range.start.row,
+            	column: range.start.column,
+            		});
+
         extraStyle = extraStyle || "";
 
         if (this.session.$bidiHandler.isBidiRow(range.start.row)) {
@@ -176,14 +182,24 @@ class Marker {
            this.drawBidiSingleLineMarker(stringBuilder, range1, clazz + " ace_br12", config, null, extraStyle);
         } else {
             top = this.$getTop(range.end.row, config);
-            var width = range.end.column * config.characterWidth;
+
+            var left = dom.columnToCoordinate({
+            	layer: this,
+            	row: range.end.row,
+            	column: 0,
+            		});
+            var width = dom.columnToCoordinate({
+            	layer: this,
+            	row: range.end.row,
+            	column: range.end.column,
+            		}) - left;
 
             this.elt(
                 clazz + " ace_br12",
                 "height:"+ height+ "px;"+
                 "width:"+ width+ "px;"+
                 "top:"+ top+ "px;"+
-                "left:"+ padding+ "px;"+ (extraStyle || "")
+                "left:"+ left + "px;"+ (extraStyle || "")
             );
         }
         // all the complete lines
@@ -223,7 +239,7 @@ class Marker {
 				var x = {};
 				for (var side of ['start', 'end'])
 					{
-						x[side] = dom.unicodeAdjustPosition({
+						x[side] = dom.columnToCoordinate({
 							layer: this,
 							row: range[side].row,
 							column: range[side].column

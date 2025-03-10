@@ -184,7 +184,7 @@ class Cursor {
             position = this.session.selection.getCursor();
         var pos = this.session.documentToScreenPosition(position);
 
-		var cursorLeft = dom.unicodeAdjustPosition({
+		var cursorLeft = dom.columnToCoordinate({
 			layer: this,
 			row: pos.row,
 				});
