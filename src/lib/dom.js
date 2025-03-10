@@ -391,13 +391,12 @@ exports.columnToCoordinate = function({layer, row, left, column} = {})
 // console.log('column', column);
 
 		var textElement = editor.renderer.$textLayer.element;
-		var lineElement = textElement.childNodes[row - editor.renderer.layerConfig.firstRow];
+		var lineElement = Array.from(textElement.querySelectorAll('.ace_line'))[row - editor.renderer.layerConfig.firstRow];
+
 		if (!lineElement)
 			{
 				return;
 			}
-		if (lineElement.getAttribute('class').indexOf('ace_line_group') >= 0)
-			lineElement = lineElement.firstChild;
 
 		var eol = true,
 			nextCharNum = 0,
