@@ -58,24 +58,24 @@ exports.applyDelta = function(docLines, delta, doNotValidate) {
         case "insert":
             var lines = delta.lines;
             if (lines.length === 1) {
-                docLines[row] = line.substring(0, startColumn) + delta.lines[0] + line.substring(startColumn);
+                docLines[row] = line.trueSubstring(0, startColumn) + delta.lines[0] + line.trueSubstring(startColumn);
             } else {
                 // @ts-ignore
                 var args = [row, 1].concat(delta.lines);
                 docLines.splice.apply(docLines, args);
-                docLines[row] = line.substring(0, startColumn) + docLines[row];
-                docLines[row + delta.lines.length - 1] += line.substring(startColumn);
+                docLines[row] = line.trueSubstring(0, startColumn) + docLines[row];
+                docLines[row + delta.lines.length - 1] += line.trueSubstring(startColumn);
             }
             break;
         case "remove":
             var endColumn = delta.end.column;
             var endRow = delta.end.row;
             if (row === endRow) {
-                docLines[row] = line.substring(0, startColumn) + line.substring(endColumn);
+                docLines[row] = line.trueSubstring(0, startColumn) + line.trueSubstring(endColumn);
             } else {
                 docLines.splice(
                     row, endRow - row + 1,
-                    line.substring(0, startColumn) + docLines[endRow].substring(endColumn)
+                    line.trueSubstring(0, startColumn) + docLines[endRow].trueSubstring(endColumn)
                 );
             }
             break;
