@@ -402,7 +402,7 @@ class Selection {
         } else if (cursor.column === 0) {
             // cursor is a line (start
             if (cursor.row > 0) {
-                this.moveCursorTo(cursor.row - 1, this.doc.getLine(cursor.row - 1).length);
+                this.moveCursorTo(cursor.row - 1, this.doc.getLine(cursor.row - 1).trueLength);
             }
         }
         else {
