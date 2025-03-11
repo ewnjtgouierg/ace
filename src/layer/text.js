@@ -587,23 +587,23 @@ class Text {
             var token = tokens[i];
             var value = token.value;
             if (i == 0 && this.displayIndentGuides) {
-                chars = value.length;
+                chars = value.trueLength;
                 value = this.renderIndentGuide(lineEl, value, splitChars);
                 if (!value)
                     continue;
-                chars -= value.length;
+                chars -= value.trueLength;
             }
 
-            if (chars + value.length < splitChars) {
+            if (chars + value.trueLength < splitChars) {
                 screenColumn = this.$renderToken(lineEl, screenColumn, token, value);
-                chars += value.length;
+                chars += value.trueLength;
             } else {
-                while (chars + value.length >= splitChars) {
+                while (chars + value.trueLength >= splitChars) {
                     screenColumn = this.$renderToken(
                         lineEl, screenColumn,
-                        token, value.substring(0, splitChars - chars)
+                        token, value.trueSubstring(0, splitChars - chars)
                     );
-                    value = value.substring(splitChars - chars);
+                    value = value.trueSubstring(splitChars - chars);
                     chars = splitChars;
 
                     lineEl = this.$createLineElement();
@@ -615,8 +615,8 @@ class Text {
                     screenColumn = 0;
                     splitChars = splits[split] || Number.MAX_VALUE;
                 }
-                if (value.length != 0) {
-                    chars += value.length;
+                if (value.trueLength != 0) {
+                    chars += value.trueLength;
                     screenColumn = this.$renderToken(
                         lineEl, screenColumn, token, value
                     );
@@ -639,7 +639,7 @@ class Text {
                 if (!value)
                     continue;
             }
-            if (screenColumn + value.length > this.MAX_LINE_LENGTH)
+            if (screenColumn + value.trueLength > this.MAX_LINE_LENGTH)
                 return this.$renderOverflowMessage(parent, screenColumn, token, value);
             screenColumn = this.$renderToken(parent, screenColumn, token, value);
         }

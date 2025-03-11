@@ -1813,6 +1813,7 @@ class EditSession {
      * @param {number} lastRow
      */
     $updateWrapData(firstRow, lastRow) {
+
         var lines = this.doc.getAllLines();
         var tabSize = this.getTabSize();
         var wrapData = this.$wrapData;
@@ -2023,10 +2024,10 @@ class EditSession {
         var tabSize;
         offset = offset || 0;
 
-        for (var i = 0; i < str.length; i++) {
-            var c = str.charCodeAt(i);
+        for (var i = 0; i < str.trueLength; i++) {
+            var char = str.trueCharAt(i);
             // Tab
-            if (c == 9) {
+            if (char == "\t") {
                 tabSize = this.getScreenTabSize(arr.length + offset);
                 arr.push(TAB);
                 for (var n = 1; n < tabSize; n++) {
@@ -2034,9 +2035,10 @@ class EditSession {
                 }
             }
             // Space
-            else if (c == 32) {
+            else if (char == " ") {
                 arr.push(SPACE);
-            } else if((c > 39 && c < 48) || (c > 57 && c < 64)) {
+                
+            } else if(char.match(/[\x28-\x2f,\x3a-\x41]/)) {
                 arr.push(PUNCTUATION);
             }
             else {
@@ -2266,7 +2268,7 @@ class EditSession {
                 if(splitIndex > 0 && splits.length) {
                     wrapIndent = splits.indent;
                     docColumn = splits[splitIndex - 1] || splits[splits.length - 1];
-                    line = line.substring(docColumn);
+                    line = line.trueSubstring(docColumn);
                 }
             }
         }
@@ -2369,12 +2371,12 @@ class EditSession {
             var wrapRow = this.$wrapData[foldStartRow];
             if (wrapRow) {
                 var screenRowOffset = 0;
-                while (textLine.length >= wrapRow[screenRowOffset]) {
+                while (textLine.trueLength >= wrapRow[screenRowOffset]) {
                     screenRow ++;
                     screenRowOffset++;
                 }
-                textLine = textLine.substring(
-                    wrapRow[screenRowOffset - 1] || 0, textLine.length
+                textLine = textLine.trueSubstring(
+                    wrapRow[screenRowOffset - 1] || 0, textLine.trueLength
                 );
                 wrapIndent = screenRowOffset > 0 ? wrapRow.indent : 0;
             }
