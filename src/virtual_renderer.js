@@ -1663,13 +1663,61 @@ class VirtualRenderer {
             canvasPos = this.scroller.getBoundingClientRect();
         }
 
-        var offsetX = x + this.scrollLeft - canvasPos.left - this.$padding;
-        var offset = offsetX / this.characterWidth;
-        var col = this.$blockCursor ? Math.floor(offset) : Math.round(offset);
-
         var row = Math.floor((y + this.scrollTop - canvasPos.top) / this.lineHeight);
 
-        return this.session.screenToDocumentPosition(row, Math.max(col, 0), offsetX);
+		var textElement = this.$textLayer.element;
+		var lineElement = Array.from(textElement.querySelectorAll('.ace_line'))[row - this.layerConfig.firstRow];
+		var lineSource = this.session.getLine(row);
+		var m = lineSource.match(/^(\t+)/);
+		var tabsCount = m ? m[1].length : 0;
+
+		var range = document.createRange();
+
+        var col = -1, dPrev;
+
+		var blockCursor = this.$blockCursor;
+
+		var parse = function(node)
+			{
+				if (node.nodeType == node.ELEMENT_NODE)
+					{
+						for (var childNode of node.childNodes)
+							if (parse(childNode)) return true;
+					}
+				else
+					{
+						var l = node.nodeValue.trueLength;
+						for (var i = 0; i<l; i++)
+							{
+								var offset = node.nodeValue.charRealPos[i];
+
+								range.setStart(node, offset);
+								range.setEnd(node, offset);
+								var elX = range.getBoundingClientRect().left;
+								var d = elX - x;
+								col ++;
+								if (d > 0)
+									{
+										if (typeof dPrev !== typeof undefined)
+											{
+												if (!blockCursor && d > Math.abs(dPrev)) col--;
+											}
+										return true;
+									}
+								dPrev = d;
+								var tab = tabsCount-- > 0;
+								if (tab) break;
+							}
+					}
+			};
+
+		parse(lineElement);
+
+		col = Math.max(0, col);
+
+// in fixed-char-width code offset was obtained and passed to screenToDocumentPosition along with row, now we determine the exact column right here, so not sure if any logic this implemented should be replicated. 2do: restore the offset or remove this comment if that is irrelevant now
+
+        return this.session.screenToDocumentPosition(row, col);
     }
 
     /**
